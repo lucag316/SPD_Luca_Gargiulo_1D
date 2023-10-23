@@ -48,3 +48,8 @@ componentes: Sensor de luz ambiental, Lampara,
 
 Si el boton deslizante esta en modo normal, va a funcionar el sensor de luz ambiental, si el nivel de luz del sensor es menor a 50 se va a encender la lampara y el motor, caso contrario la lampara va a estar apagada y el motor tambien
 Si el boton deslizante esta en modo numeros primos, no se va a poder usar,
+
+PARTE 4:
+LINK DE TINKERCAD: https://www.tinkercad.com/things/2JY3KU5WzPx-copy-of-parcial-parte-3-sensor-de-luz-ambiental-luca-gargiulo-1/editel?sharecode=nqXgFSmvrjjKYhETAqJA6PH-VVPparqlM0WQkwSq2aM
+
+cambia el deslizante en modo primos, por impares
