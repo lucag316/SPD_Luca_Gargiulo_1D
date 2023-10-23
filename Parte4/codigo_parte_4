@@ -1,0 +1,492 @@
+// Parcial parte 4
+// Luca Gargiulo 1 D
+
+//-------PINES---------------
+#define A 10
+#define B 11
+#define C 5
+#define D 6
+#define E 7
+#define F 9
+#define G 8
+
+#define DISPLAY_UNIDAD A4
+#define DISPLAY_DECENA A5
+#define APAGADOS 0
+
+#define BOTON_AUMENTAR 4
+#define BOTON_DISMINUIR 3
+#define DESLIZANTE_PRIMOS 2
+
+#define MOTOR_ACTIVAR A3
+#define MOTOR_ENTRADA1 13
+#define MOTOR_ENTRADA2 12
+
+#define SENSOR_TMP A0
+
+#define SENSOR_LUZ A2
+#define LAMPARITA A1
+//----------------------------
+
+
+//-------VARIABLES GLOBALES-------
+int contador = 0;
+
+int flagAumentarEstadoAntes = 1;
+int flagDisminuirEstadoAntes = 1;
+int flagDeslizantesEstadoAntes = 1;
+
+//--------------------------------
+
+void setup()
+{
+  //--------SALIDAS DIGITALES---------
+  pinMode(A, OUTPUT);
+  pinMode(B, OUTPUT);
+  pinMode(C, OUTPUT);
+  pinMode(D, OUTPUT);
+  pinMode(E, OUTPUT);
+  pinMode(F, OUTPUT);
+  pinMode(G, OUTPUT);
+  
+  pinMode(DISPLAY_UNIDAD, OUTPUT);
+  pinMode(DISPLAY_DECENA, OUTPUT);
+  
+  pinMode(LAMPARITA, OUTPUT);
+  
+  //--------------------------------
+  
+  //--------ENTRADAS DIGITALES---------
+  pinMode(BOTON_AUMENTAR, INPUT_PULLUP);
+  pinMode(BOTON_DISMINUIR, INPUT_PULLUP);
+  pinMode(DESLIZANTE_PRIMOS, INPUT_PULLUP);
+  //---------------------------------
+  
+  
+  //---------INICIALIZO----------
+  digitalWrite(DISPLAY_UNIDAD,LOW);
+  digitalWrite(DISPLAY_DECENA,LOW);
+  
+  digitalWrite(MOTOR_ACTIVAR, HIGH);
+  digitalWrite(MOTOR_ENTRADA1, LOW);
+  digitalWrite(MOTOR_ENTRADA2, HIGH);
+  
+  digitalWrite(LAMPARITA, LOW);
+  //------------------------------
+  
+  Serial.begin(9600);
+  // muestro 0 en el display
+  printDigit(0);
+}
+
+void loop()
+{
+  int nivelLuz = analogRead(SENSOR_LUZ);
+  bool estadoDeslizante = digitalRead(DESLIZANTE_PRIMOS);
+  int teclaPresionada = presionarTecla();//guardo en una variable el boton que se presiono
+  
+  if(estadoDeslizante)
+  {
+    // me fijo que boton se presiono
+    if(teclaPresionada == BOTON_AUMENTAR)//si se presiono, aumento 1
+    {
+      contador++;
+      if(contador > 99)//si supero 99, vuelvo a 0
+      {
+          contador = 0;
+      }
+    }
+    else if(teclaPresionada == BOTON_DISMINUIR)//si se presiono, disminuyo 1
+    {
+      contador--;
+      if(contador < 0)//si bajo a menos de 0, voy a 99
+      {
+          contador = 99;
+      }
+    }
+    //muestro el valor actual del contador
+    //printCount(contador, estadoDeslizante);
+    if(nivelLuz < 50)// si el nivel de luz es menor a 50, encender motor y lamparita, sino apagarlo
+    {
+      digitalWrite(LAMPARITA, HIGH);
+      if(esPrimo(contador))
+      {
+          encenderMotorDerecha(); //Si es un numero primo el motor gira a la derecha
+      }
+      else
+      {
+          encenderMotorIzquierda(); // sino a la izquierda
+      }
+    }
+    else
+    {
+    	apagarMotor();
+      	digitalWrite(LAMPARITA, LOW);
+    }
+    
+    int temperatura = leerTemperatura();
+    if (temperatura > 24 && temperatura < 100)// si la temperatura es mayor a 24, muestra en el display, la temperatura
+    {
+    	contador = temperatura;
+    }
+    //controlarMotorPorTemperatura(temperatura);
+    //Serial.println(temperatura);
+  }
+  else if (estadoDeslizante == LOW)
+  {
+    
+  	//calculo para mostrar los primos
+    //esPrimo(contador);
+    apagarMotor();
+    //if(esImpar(contador))
+    {
+      if(teclaPresionada == BOTON_AUMENTAR)
+      {
+          //contador = siguientePrimo(contador);
+        contador = siguienteImpar(contador);
+        //contador = contador + 2;
+      }
+      else if(teclaPresionada == BOTON_DISMINUIR)
+      {
+          //contador = anteriorPrimo(contador);
+        contador = anteriorImpar(contador);
+        //contador = contador - 2;
+      }
+      //muestro el numero primo actual
+    }
+  }
+  printCount(contador, estadoDeslizante);
+  Serial.println(contador);
+  delay(10);
+}
+bool esImpar(int numero)// no lo uso al final
+{
+	return numero % 2 != 0;
+}
+
+int siguienteImpar(int numero)// busca el proximo numero impar(parecido a la funcion de siguientePrimo)
+{
+	if(numero % 2 == 0)
+    {
+    	return numero + 1;
+    }
+  	return numero + 2;
+}
+int anteriorImpar(int numero)// busca el anterior numero impar(parecido a la funcion de anteriorPrimo)
+{
+	if(numero % 2 == 0)
+    {
+    return numero - 1;
+    }
+  	return numero - 2;
+}
+
+int leerTemperatura()
+{
+  
+	int estadoSensor = analogRead(SENSOR_TMP);
+  	int temperatura = map(estadoSensor, 20, 358, -40, 125);
+  	return temperatura;
+}
+
+void encenderMotorDerecha()// enciende el motor y gira a la derecha
+{
+	digitalWrite(MOTOR_ACTIVAR, HIGH);
+  	digitalWrite(MOTOR_ENTRADA1, LOW);
+  	digitalWrite(MOTOR_ENTRADA2, HIGH);
+}
+void encenderMotorIzquierda() // enciende el motor y gira a la izquierda
+{
+  digitalWrite(MOTOR_ACTIVAR, HIGH);
+  digitalWrite(MOTOR_ENTRADA1, HIGH);
+  digitalWrite(MOTOR_ENTRADA2, LOW);
+}
+
+void apagarMotor() 
+{
+  digitalWrite(MOTOR_ACTIVAR, LOW);
+}
+
+
+int presionarTecla()//detecta que boton se presiono y devuelve el valor
+{
+	int estadoAumentar = digitalRead(BOTON_AUMENTAR); // devuelve 0 si presiono, 1 si no presiono
+  	int estadoDisminuir = digitalRead(BOTON_DISMINUIR);
+  
+  	if(estadoAumentar) // si no presione suma, 0 es encendido, 1 apagado
+  	{
+      flagAumentarEstadoAntes = 1; // entonces antes tampoco estaba presionada
+  	}
+  	if(estadoDisminuir) // si no presione resta
+  	{
+      flagDisminuirEstadoAntes = 1;
+  	}
+  	
+  
+  	// me fijo si no estaba presionado previamente
+  	if(estadoAumentar == 0 && flagAumentarEstadoAntes == 1)
+    {
+    	flagAumentarEstadoAntes = estadoAumentar; //cambio el estado antes
+        return BOTON_AUMENTAR;
+    }
+  	if(estadoDisminuir == 0 && flagDisminuirEstadoAntes == 1)
+    {
+    	flagDisminuirEstadoAntes = estadoDisminuir;
+        return BOTON_DISMINUIR;
+    }
+  	
+  
+  return 0; // o no presione ninguna, o presione una que ya estaba apretada
+}
+
+void prenderDigito(int digito)//controla el encendido y apagado por unidad y decena de los display
+{
+	if(digito == DISPLAY_UNIDAD) // si el digito es UNIDAD
+    {
+    	digitalWrite(DISPLAY_UNIDAD, LOW); // pongo el comun de unidad en cero (prendido)
+      	digitalWrite(DISPLAY_DECENA, HIGH); // pongo el comun de decena en uno (apagado)
+    	delay(10);
+    }
+  	else if(digito == DISPLAY_DECENA)
+    {
+        digitalWrite(DISPLAY_UNIDAD, HIGH);
+      	digitalWrite(DISPLAY_DECENA, LOW);
+      	delay(10);
+    }
+  	else
+    {
+    	digitalWrite(DISPLAY_UNIDAD, HIGH);//apago 
+      	digitalWrite(DISPLAY_DECENA, HIGH);//apago
+    }
+}
+
+void printDigit(int digit)//muestra el digito pasado por parametro en un display
+{
+    digitalWrite(A, LOW);
+    digitalWrite(B, LOW);
+    digitalWrite(C, LOW);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, LOW);
+  
+	switch(digit)
+    {
+    	case 0:
+      		MostrarCero();
+      		break;
+      	
+      	case 1:
+      		MostrarUno();
+        	break;
+      
+      	case 2:
+      		MostrarDos();
+      		break;
+      
+      	case 3:
+      		MostrarTres();
+       		break;
+      
+      	case 4:
+      		MostrarCuatro();
+       		break;
+      
+      	case 5:
+      		MostrarCinco();
+       		break;
+      
+      	case 6:
+      		MostrarSeis();
+       		break;
+      
+      	case 7:
+      		MostrarSiete();
+       		break;
+      
+      	case 8:
+      		MostrarOcho();
+       		break;
+      
+      	case 9:
+      		MostrarNueve();
+       		break;
+    }
+}
+
+void printCount(int count, bool estadoDeslizante)
+{
+  if(estadoDeslizante)
+  {
+    // esto seria el contador normal
+    prenderDigito(APAGADOS);//apago ambos digitos antes de mostrar el nuevo
+  	printDigit(count / 10);//divido en 10, ej si es 37, me muestra 3 en el display decenas
+  	prenderDigito(DISPLAY_DECENA);//enciende el display decenas y apaga el de unidades
+  	prenderDigito(APAGADOS);//apago todo antes de mostrar el de unidades
+  	printDigit(count - 10 * (int(count / 10)));//cuenta ej 37, me da el 7 para las unidades
+  	prenderDigito(DISPLAY_UNIDAD);//prendo el display unidades y apago el de decenas
+  
+  }
+  else if(estadoDeslizante == LOW)
+  {
+    //esto seria el contador pero de primos
+    if(esPrimo(count))
+    {
+      prenderDigito(APAGADOS);//apago ambos digitos antes de mostrar el nuevo
+      printDigit(count / 10);//divido en 10, ej si es 37, me muestra 3 en el display decenas
+      prenderDigito(DISPLAY_DECENA);//enciende el display decenas y apaga el de unidades
+      prenderDigito(APAGADOS);//apago todo antes de mostrar el de unidades
+      printDigit(count - 10 * (int(count / 10)));//cuenta ej 37, me da el 7 para las unidades
+      prenderDigito(DISPLAY_UNIDAD);//prendo el display unidades y apago el de decenas
+  
+    }  
+  }
+}
+
+bool esPrimo(int numero) // determina si el numero es primo
+{
+  if (numero <= 1) 
+  {
+    return false;
+  }
+  for (int i = 2; i * i <= numero; i++) 
+  {
+    if (numero % i == 0) {
+      return false;
+    }
+  }
+  return true;// si no tiene divisores, es primo
+}
+
+int siguientePrimo(int numero) // busca el proximo numero primo, a partir del numero actual
+{
+    numero++; // Empezamos a buscar a partir del siguiente numero
+    while(!esPrimo(numero))
+    {
+      numero++;
+    }
+    return numero;
+}
+
+int anteriorPrimo(int numero) // busca el anterior numero primo, a partir del numero actual
+{
+    int anterior = numero - 1;
+
+    if (anterior < 2) 
+    {
+        return 2; // El primer número primo es 2
+    }
+
+    while (!esPrimo(anterior)) 
+    {
+        anterior--; 
+    }
+    return anterior;
+}
+
+
+void MostrarCero()
+{
+	digitalWrite(A, HIGH);
+  	digitalWrite(B, HIGH);
+  	digitalWrite(C, HIGH);
+  	digitalWrite(D, HIGH);
+  	digitalWrite(E, HIGH);
+  	digitalWrite(F, HIGH);
+  	digitalWrite(G, LOW);
+}
+
+void MostrarUno()
+{
+	digitalWrite(A, LOW);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, LOW);
+}
+
+void MostrarDos()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, LOW);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, LOW);
+    digitalWrite(G, HIGH);
+}
+
+void MostrarTres()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, HIGH);
+}
+
+void MostrarCuatro()
+{
+	digitalWrite(A, LOW);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, HIGH);
+    digitalWrite(G, HIGH);
+}
+
+void MostrarCinco()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, LOW);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, LOW);
+    digitalWrite(F, HIGH);
+    digitalWrite(G, HIGH);
+}
+void MostrarSeis()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, LOW);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, HIGH);
+    digitalWrite(G, HIGH);
+}
+void MostrarSiete()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, LOW);
+}
+void MostrarOcho()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, HIGH);
+    digitalWrite(G, HIGH);
+}
+void MostrarNueve()
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, HIGH);
+    digitalWrite(G, HIGH);
+}
