@@ -1,6 +1,9 @@
 # SPD_Luca_Gargiulo_1D
-PARTE 1:
+PARTE 1: 
+LINK DE TINKERCAD: https://www.tinkercad.com/things/4cmYyxcN2C1-parcial-parte-1-luca-gargiulo-1-d/editel?sharecode=yVv1DsvqzKNOOr443XenoSYA6DCw0Q7y8clRyKv1es8
+
 Componentes: boton aumentar, boton disminuir, boton reset, display decena, display unidad
+
 Si toco el boton aumentar, suma 1
 Si toco el boton disminuir,  resta 1
 Si toco el boton reset, vuelve a 0
@@ -12,6 +15,8 @@ printDigit(muestra un digito en un display, dependiendo el numero pasado por par
 printCount(muestra un numero en un display de 2 digitos, pueden ser todos los numeros o solo los primos, dependiendo el numero y el estado del deslizante pasados por parametro)
 
 PARTE 2:
+LINK DE TINKERCAD: https://www.tinkercad.com/things/7gidDRggglA-parcial-parte-2-con-motor-cc-y-sensor-de-tmp-luca-gargiulo-1-d/editel?sharecode=zk_xddD4kh23IgKTQ4-U7LGQdPfFjIrFeFLuB23ukfY
+
 Componentes: boton aumentar, boton disminuir, boton deslizante(numeros, solo primos), motor cc, display decena, display unidad, motor cc, sensor de temperatura,
 
 Si el boton deslizante esta encendido, en el display se van a mostrar todos los numeros del 0 al 99, (si tocas el boton aumentar, suma 1, si tocas el boton disminuir, resta 1)
@@ -36,6 +41,8 @@ leerTemperatura(lee la temperatura segun el estado del sensor, usa la funcion ma
 
 
 PARTE 3:
+LINK DE TINKERCAD: https://www.tinkercad.com/things/4oZK3KYrTs3-parcial-parte-3-sensor-de-luz-ambiental-luca-gargiulo-1-d/editel?sharecode=9-DJo2B7plnt27dQN4dKdjio1Z5inYp-adoV8Fudg5A
+
 Incluye todo lo de la parte 2 y se le agrega:
 componentes: Sensor de luz ambiental, Lampara,
 
