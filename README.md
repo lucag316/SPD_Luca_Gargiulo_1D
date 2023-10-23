@@ -37,7 +37,7 @@ apagarMotor,
 esPrimo(determina si un numero es primo, recibe un numero como parametro, devuelve true or false),
 siguientePrimo(busca el proximo primo a partir del numero pasado por parametro, devuelve un entero),
 anteriorPrimo(busca el anterior primo a partir del numero pasado por parametro, devuelve un entero),
-leerTemperatura(lee la temperatura segun el estado del sensor, usa la funcion map y devuelve la un entero(temperatura)),
+leerTemperatura(lee la temperatura segun el estado del sensor, usa la funcion map y devuelve un entero(temperatura)),
 
 
 PARTE 3:
